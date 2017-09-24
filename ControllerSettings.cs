@@ -3,14 +3,22 @@ using System.Configuration;
 using System.Drawing;
 using System.Windows;
 using SharpDX.XInput;
+using System.Runtime.InteropServices;
 
 namespace d3gamepad
 {
     public class ControllerSettings
     {
+        [DllImport("gdi32.dll")]
+        static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+        public enum DeviceCap
+        {
+            VERTRES = 10,
+            DESKTOPVERTRES = 117,
+        }
+
         public int character_ratio { get; }
         public int deadzone { get; }
-        public float dpi_fix { get; }
         public int force_ratio { get; }
         public int max { get; }
         public int max_stick { get; }
@@ -18,7 +26,28 @@ namespace d3gamepad
         public int stick2_ratio { get; }
         public int vb_stick_value { get; }
         public bool vibration { get; }
+        public bool dpi_check { get; }
         public bool moveattack { get; set; }
+        public float ScreenScalingFactor { get; set; }
+
+        // VKC
+        public string VKC_ForceStop { get; set; }
+        public string VKC_ForceMove { get; set; }
+        public string VKC_Skill3 { get; set; }
+        public string VKC_Skill4 { get; set; }
+        public string VKC_Skill5 { get; set; }
+        public string VKC_Skill6 { get; set; }
+        public string VKC_Potion { get; set; }
+        public string VKC_Character { get; set; }
+        public string VKC_TownPortal { get; set; }
+        public string VKC_Skill { get; set; }
+
+        public string VKC_Start { get; set; }
+        public string VKC_Inventory { get; set; }
+        public string VKC_MAP { get; set; }
+
+        public string VKC_HINTS { get; set; }
+        public string VKC_SKIP { get; set; }
 
         // SCREEN VARIABLES
         public int screenWidth { get; set; }
@@ -47,6 +76,40 @@ namespace d3gamepad
 
         public ControllerSettings()
         {
+            // VKC
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_ForceMove"]))
+                VKC_ForceMove = Convert.ToString(ConfigurationManager.AppSettings["VKC_ForceMove"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_ForceStop"]))
+                VKC_ForceStop = Convert.ToString(ConfigurationManager.AppSettings["VKC_ForceStop"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_Skill3"]))
+                VKC_Skill3 = Convert.ToString(ConfigurationManager.AppSettings["VKC_Skill3"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_Skill4"]))
+                VKC_Skill4 = Convert.ToString(ConfigurationManager.AppSettings["VKC_Skill4"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_Skill5"]))
+                VKC_Skill5 = Convert.ToString(ConfigurationManager.AppSettings["VKC_Skill5"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_Skill6"]))
+                VKC_Skill6 = Convert.ToString(ConfigurationManager.AppSettings["VKC_Skill6"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_Potion"]))
+                VKC_Potion = Convert.ToString(ConfigurationManager.AppSettings["VKC_Potion"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_Character"]))
+                VKC_Character = Convert.ToString(ConfigurationManager.AppSettings["VKC_Character"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_TownPortal"]))
+                VKC_TownPortal = Convert.ToString(ConfigurationManager.AppSettings["VKC_TownPortal"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_Skill"]))
+                VKC_Skill = Convert.ToString(ConfigurationManager.AppSettings["VKC_Skill"]);
+
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_Start"]))
+                VKC_Start = Convert.ToString(ConfigurationManager.AppSettings["VKC_Start"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_Inventory"]))
+                VKC_Inventory = Convert.ToString(ConfigurationManager.AppSettings["VKC_Inventory"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_MAP"]))
+                VKC_MAP = Convert.ToString(ConfigurationManager.AppSettings["VKC_MAP"]);
+
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_HINTS"]))
+                VKC_HINTS = Convert.ToString(ConfigurationManager.AppSettings["VKC_HINTS"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["VKC_SKIP"]))
+                VKC_SKIP = Convert.ToString(ConfigurationManager.AppSettings["VKC_SKIP"]);
+
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["force_ratio"]))
                 force_ratio = Convert.ToInt16(ConfigurationManager.AppSettings["force_ratio"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["stick2_ratio"]))
@@ -67,9 +130,8 @@ namespace d3gamepad
                 vibration = Convert.ToBoolean(ConfigurationManager.AppSettings["vibration"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["vb_stick"]))
                 vb_stick_value = Convert.ToInt16(ConfigurationManager.AppSettings["vb_stick"]);
-            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["dpi_fix"]))
-                dpi_fix = (float) Convert.ToDouble(ConfigurationManager.AppSettings["dpi_fix"]);
-
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["dpi_check"]))
+                dpi_check = Convert.ToBoolean(ConfigurationManager.AppSettings["dpi_check"]);
 
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["refresh_rate"]))
                 refresh_rate = Convert.ToDouble(ConfigurationManager.AppSettings["refresh_rate"]);
@@ -144,13 +206,19 @@ namespace d3gamepad
         public void UpdateScreenValues()
         {
             // DPI SETTINGS
-            var graphics = Graphics.FromHwnd(IntPtr.Zero);
-            var dpiX = (graphics.DpiX + dpi_fix) / 100;
-            var dpiY = (graphics.DpiY + dpi_fix) / 100;
+            Graphics g = Graphics.FromHwnd(IntPtr.Zero);
+            IntPtr desktop = g.GetHdc();
+            int LogicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.VERTRES);
+            int PhysicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.DESKTOPVERTRES);
+
+            if (!dpi_check)
+                ScreenScalingFactor = 1;
+            else
+                ScreenScalingFactor = (float)PhysicalScreenHeight / (float)LogicalScreenHeight;
 
             // SCREEN SETTINGS
-            screenWidth = Convert.ToInt16(SystemParameters.PrimaryScreenWidth * dpiX);
-            screenHeight = Convert.ToInt16(SystemParameters.PrimaryScreenHeight * dpiY);
+            screenWidth = Convert.ToInt16(SystemParameters.PrimaryScreenWidth * ScreenScalingFactor);
+            screenHeight = Convert.ToInt16(SystemParameters.PrimaryScreenHeight * ScreenScalingFactor);
 
             screenWidth_round = screenHeight; // CIRCLE SCREEN
             c_screenWidth = screenWidth / 2;

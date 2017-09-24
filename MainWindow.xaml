@@ -1,12 +1,13 @@
 ﻿<Window x:Class="d3gamepad.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="d3gamepad" Height="350" Width="525">
+        Title="d3gamepad" Height="236.274" Width="293.627">
     <Grid >
-        <TextBox x:Name="Refresh_rate" HorizontalAlignment="Left" Height="23" Margin="10,65,0,0" TextWrapping="Wrap" Text="60" VerticalAlignment="Top" Width="73" TextChanged="Refresh_rate_OnTextChanged"/>
-        <Label x:Name="Refresh_label" Content="Refresh rate&#xD;&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,34,0,0" Height="31"/>
-        <TextBox x:Name="Left_stick_speed" HorizontalAlignment="Left" Height="23" Margin="10,124,0,0" TextWrapping="Wrap" Text="20000" VerticalAlignment="Top" Width="73"/>
-        <Label x:Name="Left_stick_speed_label" Content="Left stick speed&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,93,0,0" Height="31"/>
-        <Button x:Name="Save" Content="Save" HorizontalAlignment="Left" Margin="10,289,0,0" VerticalAlignment="Top" Width="75" Click="Save_Click"/>
+        <TextBox x:Name="Refresh_rate" HorizontalAlignment="Left" Height="23" Margin="10,40,0,0" TextWrapping="Wrap" Text="60" VerticalAlignment="Top" Width="73" TextChanged="Refresh_rate_OnTextChanged"/>
+        <Label x:Name="Refresh_label" Content="Refresh rate&#xD;&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,9,0,0" Height="31"/>
+        <TextBox x:Name="Left_stick_speed" HorizontalAlignment="Left" Height="23" Margin="10,99,0,0" TextWrapping="Wrap" Text="20000" VerticalAlignment="Top" Width="73"/>
+        <Label x:Name="Left_stick_speed_label" Content="Left stick speed&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,68,0,0" Height="31"/>
+        <Label x:Name="Left_stick_speed_label_Copy" Content="DPI&#xA;" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,127,0,0" Height="31"/>
+        <TextBox x:Name="DPI" HorizontalAlignment="Left" Height="23" Margin="10,163,0,0" TextWrapping="Wrap" Text="1" VerticalAlignment="Top" Width="73"/>
     </Grid>
 </Window>

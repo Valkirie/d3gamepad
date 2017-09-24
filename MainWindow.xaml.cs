@@ -65,6 +65,7 @@ namespace d3gamepad
         private void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
         {
             _settings.UpdateScreenValues();
+            DPI.Text = "" + _settings.ScreenScalingFactor;
         }
 
         private void SetCurrentSettings()

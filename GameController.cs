@@ -62,6 +62,79 @@ namespace d3gamepad
         private int old_state;
         private Gamepad gamepadState;
 
+        // VKC
+        private VirtualKeyCode VKC_ForceMove;
+        private VirtualKeyCode VKC_ForceStop;
+        private VirtualKeyCode VKC_Skill3;
+        private VirtualKeyCode VKC_Skill4;
+        private VirtualKeyCode VKC_Skill5;
+        private VirtualKeyCode VKC_Skill6;
+        private VirtualKeyCode VKC_Potion;
+        private VirtualKeyCode VKC_Character;
+        private VirtualKeyCode VKC_TownPortal;
+        private VirtualKeyCode VKC_Skill;
+
+        private VirtualKeyCode VKC_Start;
+        private VirtualKeyCode VKC_Inventory;
+        private VirtualKeyCode VKC_MAP;
+
+        private VirtualKeyCode VKC_SKIP;
+        private VirtualKeyCode VKC_HINTS;
+
+        public VirtualKeyCode StringToVKC(string str)
+        {
+            switch (str)
+            {
+                case "VK_E":
+                    return VirtualKeyCode.VK_E;
+                    break;
+                case "VK_1":
+                    return VirtualKeyCode.VK_1;
+                    break;
+                case "VK_2":
+                    return VirtualKeyCode.VK_2;
+                    break;
+                case "VK_3":
+                    return VirtualKeyCode.VK_3;
+                    break;
+                case "VK_4":
+                    return VirtualKeyCode.VK_4;
+                    break;
+                case "VK_Q":
+                    return VirtualKeyCode.VK_Q;
+                    break;
+                case "VK_I":
+                    return VirtualKeyCode.VK_I;
+                    break;
+                case "VK_T":
+                    return VirtualKeyCode.VK_T;
+                    break;
+                case "VK_S":
+                    return VirtualKeyCode.VK_S;
+                    break;
+                case "ESCAPE":
+                    return VirtualKeyCode.ESCAPE;
+                    break;
+                case "LMENU":
+                    return VirtualKeyCode.LMENU;
+                    break;
+                case "TAB":
+                    return VirtualKeyCode.TAB;
+                    break;
+                case "LCONTROL":
+                    return VirtualKeyCode.LCONTROL;
+                    break;
+                case "SPACE":
+                    return VirtualKeyCode.SPACE;
+                    break;
+                case "SHIFT":
+                    return VirtualKeyCode.SHIFT;
+                    break;
+                default:
+                    return VirtualKeyCode.VK_0;
+            }
+        }
+
         public GameController(Controller controller, ControllerSettings settings, InputSimulator simulator)
         {
             _controller = controller;
@@ -71,6 +144,25 @@ namespace d3gamepad
             // VIBRATION SETTINGS
             vb_stick.RightMotorSpeed = 0;
             vb_stick.LeftMotorSpeed = Convert.ToUInt16(_settings.vb_stick_value);
+
+            // DEFINE VKCs
+            VKC_ForceMove = StringToVKC(_settings.VKC_ForceMove);
+            VKC_ForceStop = StringToVKC(_settings.VKC_ForceStop);
+            VKC_Skill3 = StringToVKC(_settings.VKC_Skill3);
+            VKC_Skill4 = StringToVKC(_settings.VKC_Skill4);
+            VKC_Skill5 = StringToVKC(_settings.VKC_Skill5);
+            VKC_Skill6 = StringToVKC(_settings.VKC_Skill6);
+            VKC_Potion = StringToVKC(_settings.VKC_Potion);
+            VKC_Character = StringToVKC(_settings.VKC_Character);
+            VKC_TownPortal = StringToVKC(_settings.VKC_TownPortal);
+            VKC_Skill = StringToVKC(_settings.VKC_Skill);
+
+            VKC_Start = StringToVKC(_settings.VKC_Start);
+            VKC_Inventory = StringToVKC(_settings.VKC_Inventory);
+            VKC_MAP = StringToVKC(_settings.VKC_MAP);
+
+            VKC_SKIP = StringToVKC(_settings.VKC_SKIP);
+            VKC_HINTS = StringToVKC(_settings.VKC_HINTS);
         }
 
         private PointerTouchInfo MakePointerTouchInfo(PointerInputType pointer, PointerFlags click, int x, int y,
@@ -78,7 +170,7 @@ namespace d3gamepad
         {
             var contact = new PointerTouchInfo
             {
-                PointerInfo = {pointerType = pointer},
+                PointerInfo = { pointerType = pointer },
                 TouchFlags = TouchFlags.NONE,
                 Orientation = orientation,
                 Pressure = pressure
@@ -198,7 +290,7 @@ namespace d3gamepad
                 {
                     if (!skill3)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_1);
+                        _inputSimulator.Keyboard.KeyDown(VKC_Skill3);
                         skill3 = true;
                     }
                 }
@@ -206,7 +298,7 @@ namespace d3gamepad
                 {
                     if (skill3)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_1);
+                        _inputSimulator.Keyboard.KeyUp(VKC_Skill3);
                         skill3 = false;
                     }
                 }
@@ -218,7 +310,7 @@ namespace d3gamepad
                 {
                     if (!skill4)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_2);
+                        _inputSimulator.Keyboard.KeyDown(VKC_Skill4);
                         skill4 = true;
                     }
                 }
@@ -226,7 +318,7 @@ namespace d3gamepad
                 {
                     if (skill4)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_2);
+                        _inputSimulator.Keyboard.KeyUp(VKC_Skill4);
                         skill4 = false;
                     }
                 }
@@ -238,7 +330,7 @@ namespace d3gamepad
                 {
                     if (!skill5)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_3);
+                        _inputSimulator.Keyboard.KeyDown(VKC_Skill5);
                         skill5 = true;
                     }
                 }
@@ -246,7 +338,7 @@ namespace d3gamepad
                 {
                     if (skill5)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_3);
+                        _inputSimulator.Keyboard.KeyUp(VKC_Skill5);
                         skill5 = false;
                     }
                 }
@@ -259,7 +351,7 @@ namespace d3gamepad
                     //MessageBox.Show("RightTrigger");
                     if (!skill6)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_4);
+                        _inputSimulator.Keyboard.KeyDown(VKC_Skill6);
                         skill6 = true;
                     }
                 }
@@ -267,7 +359,7 @@ namespace d3gamepad
                 {
                     if (skill6)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_4);
+                        _inputSimulator.Keyboard.KeyUp(VKC_Skill6);
                         skill6 = false;
                     }
                 }
@@ -279,7 +371,7 @@ namespace d3gamepad
                 {
                     if (!potion)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_Q);
+                        _inputSimulator.Keyboard.KeyDown(VKC_Potion);
                         potion = true;
                     }
                 }
@@ -287,7 +379,7 @@ namespace d3gamepad
                 {
                     if (potion)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_Q);
+                        _inputSimulator.Keyboard.KeyUp(VKC_Potion);
                         potion = false;
                     }
                 }
@@ -299,7 +391,7 @@ namespace d3gamepad
                 {
                     if (!start)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.ESCAPE);
+                        _inputSimulator.Keyboard.KeyDown(VKC_Start);
                         start = true;
                     }
                 }
@@ -307,7 +399,7 @@ namespace d3gamepad
                 {
                     if (start)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.ESCAPE);
+                        _inputSimulator.Keyboard.KeyUp(VKC_Start);
                         start = false;
                     }
                 }
@@ -319,7 +411,7 @@ namespace d3gamepad
                 {
                     if (!character)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_I);
+                        _inputSimulator.Keyboard.KeyDown(VKC_Character);
                         character = true;
                     }
                 }
@@ -327,7 +419,7 @@ namespace d3gamepad
                 {
                     if (character)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_I);
+                        _inputSimulator.Keyboard.KeyUp(VKC_Character);
                         character = false;
                     }
                 }
@@ -343,7 +435,7 @@ namespace d3gamepad
                 {
                     if (!show_item)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.LMENU);
+                        _inputSimulator.Keyboard.KeyDown(VKC_Inventory);
                         show_item = true;
                     }
                 }
@@ -351,7 +443,7 @@ namespace d3gamepad
                 {
                     if (show_item)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.LMENU);
+                        _inputSimulator.Keyboard.KeyUp(VKC_Inventory);
                         show_item = false;
                     }
                 }
@@ -363,7 +455,7 @@ namespace d3gamepad
                 {
                     if (!town_portal)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_T);
+                        _inputSimulator.Keyboard.KeyDown(VKC_TownPortal);
                         town_portal = true;
                     }
                 }
@@ -371,7 +463,7 @@ namespace d3gamepad
                 {
                     if (town_portal)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_T);
+                        _inputSimulator.Keyboard.KeyUp(VKC_TownPortal);
                         town_portal = false;
                     }
                 }
@@ -383,7 +475,7 @@ namespace d3gamepad
                 {
                     if (!skill)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_S);
+                        _inputSimulator.Keyboard.KeyDown(VKC_Skill);
                         skill = true;
                     }
                 }
@@ -391,7 +483,7 @@ namespace d3gamepad
                 {
                     if (skill)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_S);
+                        _inputSimulator.Keyboard.KeyUp(VKC_Skill);
                         skill = false;
                     }
                 }
@@ -403,7 +495,7 @@ namespace d3gamepad
                 {
                     if (!map)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.TAB);
+                        _inputSimulator.Keyboard.KeyDown(VKC_MAP);
                         map = true;
                     }
                 }
@@ -411,7 +503,7 @@ namespace d3gamepad
                 {
                     if (map)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.TAB);
+                        _inputSimulator.Keyboard.KeyUp(VKC_MAP);
                         map = false;
                     }
                 }
@@ -423,7 +515,7 @@ namespace d3gamepad
                 {
                     if (!spacebar)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.SPACE);
+                        _inputSimulator.Keyboard.KeyDown(VKC_SKIP);
                         spacebar = true;
                     }
                 }
@@ -431,7 +523,7 @@ namespace d3gamepad
                 {
                     if (spacebar)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.SPACE);
+                        _inputSimulator.Keyboard.KeyUp(VKC_SKIP);
                         spacebar = false;
                     }
                 }
@@ -443,7 +535,7 @@ namespace d3gamepad
                 {
                     if (!ctrl)
                     {
-                        _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.LCONTROL);
+                        _inputSimulator.Keyboard.KeyDown(VKC_HINTS);
                         ctrl = true;
                     }
                 }
@@ -451,7 +543,7 @@ namespace d3gamepad
                 {
                     if (ctrl)
                     {
-                        _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.LCONTROL);
+                        _inputSimulator.Keyboard.KeyUp(VKC_HINTS);
                         ctrl = false;
                     }
                 }
@@ -565,12 +657,12 @@ namespace d3gamepad
             if (f)
             {
                 force_move = true;
-                _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.VK_E);
+                _inputSimulator.Keyboard.KeyDown(VKC_ForceMove);
             }
             else
             {
                 force_move = false;
-                _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.VK_E);
+                _inputSimulator.Keyboard.KeyUp(VKC_ForceMove);
             }
         }
 
@@ -579,12 +671,12 @@ namespace d3gamepad
             if (f)
             {
                 force_stop = true;
-                _inputSimulator.Keyboard.KeyDown(VirtualKeyCode.SHIFT);
+                _inputSimulator.Keyboard.KeyDown(VKC_ForceStop);
             }
             else
             {
                 force_stop = false;
-                _inputSimulator.Keyboard.KeyUp(VirtualKeyCode.SHIFT);
+                _inputSimulator.Keyboard.KeyUp(VKC_ForceStop);
             }
         }
 
