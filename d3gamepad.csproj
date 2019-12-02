@@ -147,11 +147,30 @@
   <ItemGroup>
     <None Include="App.config">
       <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Ressources\XBOne_A.png" />
+    <Resource Include="Ressources\XBOne_B.png" />
+    <Resource Include="Ressources\XBOne_DPad.png" />
+    <Resource Include="Ressources\XBOne_DPad_All.png" />
+    <Resource Include="Ressources\XBOne_DPad_Down.png" />
+    <Resource Include="Ressources\XBOne_DPad_Left.png" />
+    <Resource Include="Ressources\XBOne_DPad_Right.png" />
+    <Resource Include="Ressources\XBOne_DPad_Up.png" />
+    <Resource Include="Ressources\XBOne_DPad_XAxis.png" />
+    <Resource Include="Ressources\XBOne_DPad_YAxis.png" />
+    <Resource Include="Ressources\XBOne_LB.png" />
+    <Resource Include="Ressources\XBOne_LT.png" />
+    <Resource Include="Ressources\XBOne_Menu.png" />
+    <Resource Include="Ressources\XBOne_RB.png" />
+    <Resource Include="Ressources\XBOne_RT.png" />
+    <Resource Include="Ressources\XBOne_View.png" />
+    <Resource Include="Ressources\XBOne_X.png" />
+    <Resource Include="Ressources\XBOne_Y.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

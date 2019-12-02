@@ -87,49 +87,34 @@ namespace d3gamepad
             {
                 case "VK_E":
                     return VirtualKeyCode.VK_E;
-                    break;
                 case "VK_1":
                     return VirtualKeyCode.VK_1;
-                    break;
                 case "VK_2":
                     return VirtualKeyCode.VK_2;
-                    break;
                 case "VK_3":
                     return VirtualKeyCode.VK_3;
-                    break;
                 case "VK_4":
                     return VirtualKeyCode.VK_4;
-                    break;
                 case "VK_Q":
                     return VirtualKeyCode.VK_Q;
-                    break;
                 case "VK_I":
                     return VirtualKeyCode.VK_I;
-                    break;
                 case "VK_T":
                     return VirtualKeyCode.VK_T;
-                    break;
                 case "VK_S":
                     return VirtualKeyCode.VK_S;
-                    break;
                 case "ESCAPE":
                     return VirtualKeyCode.ESCAPE;
-                    break;
                 case "LMENU":
                     return VirtualKeyCode.LMENU;
-                    break;
                 case "TAB":
                     return VirtualKeyCode.TAB;
-                    break;
                 case "LCONTROL":
                     return VirtualKeyCode.LCONTROL;
-                    break;
                 case "SPACE":
                     return VirtualKeyCode.SPACE;
-                    break;
                 case "SHIFT":
                     return VirtualKeyCode.SHIFT;
-                    break;
                 default:
                     return VirtualKeyCode.VK_0;
             }
@@ -176,7 +161,6 @@ namespace d3gamepad
                 Pressure = pressure
             };
 
-
             if (type == "Start")
                 contact.PointerInfo.PointerFlags = PointerFlags.DOWN | PointerFlags.INRANGE | PointerFlags.INCONTACT;
             else if (type == "Move")
@@ -209,13 +193,18 @@ namespace d3gamepad
             state = _controller.GetState();
             gamepadState = state.Gamepad;
 
+            if (_settings.hasChanged)
+            {
+                cursor_x = _settings.d3_Rect.Left + _settings.c_d3Width; // Reset cursor for stick 2
+                cursor_y = _settings.d3_Rect.Top + _settings.c_d3Height; // Reset cursor for stick 2
+            }
+
             if (gamepadState.GetHashCode() != old_state || stick2 || gamepadState.LeftTrigger > 0)
             {
                 old_state = gamepadState.GetHashCode();
 
                 var leftStick = Normalize(gamepadState.LeftThumbX, gamepadState.LeftThumbY, Gamepad.LeftThumbDeadZone);
-                var rightStick = Normalize(gamepadState.RightThumbX, gamepadState.RightThumbY,
-                    Gamepad.RightThumbDeadZone);
+                var rightStick = Normalize(gamepadState.RightThumbX, gamepadState.RightThumbY, Gamepad.RightThumbDeadZone);
 
                 // ---------------------------------------------------------------------------------------------
                 // BUTTONS HANDLING
@@ -348,7 +337,6 @@ namespace d3gamepad
                 // ---------------------------------------------------------------------------------------------
                 if (gamepadState.RightTrigger > 0)
                 {
-                    //MessageBox.Show("RightTrigger");
                     if (!skill6)
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_Skill6);
@@ -553,26 +541,26 @@ namespace d3gamepad
                 // ---------------------------------------------------------------------------------------------
 
                 // ---------------------------------------------------------------------------------------------
-                // AIM & ATTACK
+                // AIM & ATTACK : Fixed
                 // ---------------------------------------------------------------------------------------------
                 if (leftStick.X != 0 || leftStick.Y != 0 && !stick2)
                 {
                     if (!stick1)
                         stick1 = true;
 
-                    cursor_x = 0; // Reset cursor for stick 2
-                    cursor_y = 0; // Reset cursor for stick 2
+                    cursor_x = _settings.d3_Rect.Left + _settings.c_d3Width; // Reset cursor for stick 2
+                    cursor_y = _settings.d3_Rect.Top + _settings.c_d3Height; // Reset cursor for stick 2
 
                     var gamepad_x = Convert.ToInt16(leftStick.X * _settings.stick_speed);
                     var gamepad_y = Convert.ToInt16(leftStick.Y * _settings.stick_speed);
-                    var x_ratio = gamepad_x * _settings.screenWidth_round / _settings.max;
-                    var y_ratio = gamepad_y * _settings.screenHeight / _settings.max;
+                    var x_ratio = gamepad_x * _settings.d3Height / _settings.max;
+                    var y_ratio = gamepad_y * _settings.d3Height / _settings.max;
 
                     var returned_x = x_ratio / (_settings.force_ratio - force_ratio_inc);
                     var returned_y = -y_ratio / (_settings.force_ratio - force_ratio_inc);
 
-                    x_value = _settings.c_screenWidth + returned_x;
-                    y_value = _settings.c_screenHeight + returned_y;
+                    x_value = _settings.c_d3Width + _settings.d3_Rect.Left + returned_x;
+                    y_value = _settings.c_d3Height + _settings.d3_Rect.Top + returned_y;
 
                     if (!force_stop)
                     {
@@ -632,18 +620,16 @@ namespace d3gamepad
                     var returned_x2 = gamepad_x2;
                     var returned_y2 = -gamepad_y2;
 
-                    if (_settings.c_screenWidth + cursor_x + returned_x2 >= 0 &&
-                        _settings.c_screenWidth + cursor_x + returned_x2 <= _settings.screenWidth)
-                        cursor_x += returned_x2;
-                    if (_settings.c_screenHeight + cursor_y + returned_y2 >= 0 &&
-                        _settings.c_screenHeight + cursor_y + returned_y2 <= _settings.screenHeight)
-                        cursor_y += returned_y2;
+                    if(cursor_x + returned_x2 < _settings.d3_Rect.Left + _settings.d3Width)
+                        if (cursor_x + returned_x2 > _settings.d3_Rect.Left)
+                            cursor_x += returned_x2;
 
-                    x_value = _settings.c_screenWidth + cursor_x;
-                    y_value = _settings.c_screenHeight + cursor_y;
+                    if (cursor_y + returned_y2 > _settings.d3_Rect.Top)
+                        if (cursor_y + returned_y2 < _settings.d3_Rect.Bottom)
+                            cursor_y += returned_y2;
 
                     if (!stick1)
-                        MoveMouseTo(x_value, y_value);
+                        MoveMouseTo(cursor_x, cursor_y);
                 }
                 else if (stick2)
                 {

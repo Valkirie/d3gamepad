@@ -8,6 +8,9 @@ using WindowsInput;
 using Microsoft.Win32;
 using SharpDX.XInput;
 using TCD.System.TouchInjection;
+using System.Windows.Media.Imaging;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace d3gamepad
 {
@@ -17,16 +20,36 @@ namespace d3gamepad
         private readonly InputSimulator _inputSimulator;
         private ControllerSettings _settings;
 
+        [DllImport("user32.dll")]
+        static extern bool GetCursorPos(ref System.Drawing.Point lpPoint);
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
+        public static extern int BitBlt(IntPtr hDC, int x, int y, int nWidth, int nHeight, IntPtr hSrcDC, int xSrc, int ySrc, int dwRop);
+
+        Bitmap screenPixel = new Bitmap(1, 1, PixelFormat.Format32bppArgb);
+        public Color GetColorAt(System.Drawing.Point location)
+        {
+            using (Graphics gdest = Graphics.FromImage(screenPixel))
+            {
+                using (Graphics gsrc = Graphics.FromHwnd(IntPtr.Zero))
+                {
+                    IntPtr hSrcDC = gsrc.GetHdc();
+                    IntPtr hDC = gdest.GetHdc();
+                    int retval = BitBlt(hDC, 0, 0, 1, 1, hSrcDC, location.X, location.Y, (int)CopyPixelOperation.SourceCopy);
+                    gdest.ReleaseHdc();
+                    gsrc.ReleaseHdc();
+                }
+            }
+
+            return screenPixel.GetPixel(0, 0);
+        }
+
         public MainWindow()
         {
             InitializeComponent();
 
             // READ SETTINGS
-
             _settings = new ControllerSettings();
-            _settings.UpdateScreenValues();
-
-            SetCurrentSettings();
 
             TouchInjector.InitializeTouchInjection();
 
@@ -34,21 +57,35 @@ namespace d3gamepad
 
             _gameController = new GameController(new Controller(UserIndex.One), _settings, _inputSimulator);
 
-
             if (_gameController.IsConnected())
             {
                 double msPerSecond = 1000;
                 var msPerFrameRefresh = msPerSecond / _settings.refresh_rate;
                 var timer = Observable.Interval(TimeSpan.FromMilliseconds(msPerFrameRefresh));
 
-                timer
-//                    .DoWhile(_gameController.IsConnected)
-                    .Subscribe(_ => {
-                        if (_gameController.IsConnected())
-                        {
-                            _gameController.Poll();
-                        }
-                    });
+                timer.Subscribe(_ => {
+                    if (_gameController.IsConnected())
+                    {
+                        _gameController.Poll();
+                        _settings.UpdateScreenValues();
+                        Application.Current.Dispatcher.Invoke(new Action(() => testImage.Margin = new Thickness(_settings.d3_Rect.Left, _settings.d3_Rect.Top,0,0)));
+                    }
+
+                    /* Nominal values at 1080p
+                    // x: 1280
+                    // y: 968
+                    
+                    System.Drawing.Point cursor = new System.Drawing.Point(1280, 968);
+                    //GetCursorPos(ref cursor);
+                    Color c = GetColorAt(cursor);
+
+                    if (c.R == 160 && c.G == 169 && c.B == 173)
+                        Application.Current.Dispatcher.Invoke(new Action(() => Grid1.Visibility = Visibility.Visible)); 
+                    else
+                        Application.Current.Dispatcher.Invoke(new Action(() => Grid1.Visibility = Visibility.Hidden)); 
+
+                    //MessageBox.Show("x:" + cursor.X + ",y:" + cursor.Y + "\n RGB:" + c.R + " " + c.G + " " + c.B); */
+                });
             }
             else
             {
@@ -56,21 +93,6 @@ namespace d3gamepad
                 MessageBox.Show("No controller detected, closing...");
                 Close();
             }
-
-//            CompositionTarget.Rendering += _gameController.CompositionTarget_Rendering;
-
-            SystemEvents.DisplaySettingsChanged += SystemEvents_DisplaySettingsChanged;
-        }
-
-        private void SystemEvents_DisplaySettingsChanged(object sender, EventArgs e)
-        {
-            _settings.UpdateScreenValues();
-            DPI.Text = "" + _settings.ScreenScalingFactor;
-        }
-
-        private void SetCurrentSettings()
-        {
-            Left_stick_speed.Text = Convert.ToString(_settings.stick_speed);
         }
 
         [DllImport("user32.dll", SetLastError = true)]
@@ -117,28 +139,6 @@ namespace d3gamepad
             public uint mouseData;
             public uint time;
             public IntPtr dwExtraInfo;
-        }
-
-        private void Save_Click(object sender, RoutedEventArgs e)
-        {
-            
-        }
-        
-        private void Refresh_rate_OnTextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (!Regex.IsMatch(Refresh_rate.Text, "[0-9]"))
-            {
-                var test = 1;
-            }
-            else
-            {
-                var test = 1;
-            }
-        }
-
-        private void Left_stick_speed_OnTextChanged(object sender, TextChangedEventArgs e)
-        {
-            throw new NotImplementedException();
         }
     }
 }

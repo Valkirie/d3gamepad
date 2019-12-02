@@ -4,11 +4,26 @@ using System.Drawing;
 using System.Windows;
 using SharpDX.XInput;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace d3gamepad
 {
     public class ControllerSettings
     {
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern IntPtr FindWindow(string strClassName, string strWindowName);
+
+        [DllImport("user32.dll")]
+        public static extern bool GetWindowRect(IntPtr hwnd, ref Rect rectangle);
+
+        public struct Rect
+        {
+            public int Left { get; set; }
+            public int Top { get; set; }
+            public int Right { get; set; }
+            public int Bottom { get; set; }
+        }
+
         [DllImport("gdi32.dll")]
         static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
         public enum DeviceCap
@@ -50,14 +65,19 @@ namespace d3gamepad
         public string VKC_SKIP { get; set; }
 
         // SCREEN VARIABLES
+        public int d3Width { get; set; }
+        public int d3Height { get; set; }
+        public int c_d3Width { get; set; }
+        public int c_d3Height { get; set; }
+
         public int screenWidth { get; set; }
-        public int screenWidth_round { get; set; }
         public int screenHeight { get; set; }
-        public int c_screenWidth { get; set; }
-        public int c_screenHeight { get; set; }
+
+        public Rect d3_Rect = new Rect();
+        public bool hasChanged = false;
+
         public double refresh_rate { get; set; }
         public int stick_speed2 { get; set;  }
-
 
         public GamepadButtonFlags GamepadButtonFlagsA { get; }
         public GamepadButtonFlags GamepadButtonFlagsB { get; }
@@ -205,6 +225,29 @@ namespace d3gamepad
 
         public void UpdateScreenValues()
         {
+            // GET WINDOW
+            Process[] processes = Process.GetProcessesByName("Diablo III64");
+
+            if (processes.Length == 0)
+                return;
+
+            Process d3 = processes[0];
+            IntPtr ptr = d3.MainWindowHandle;
+
+            Rect tmp_Rect = new Rect();
+            GetWindowRect(ptr, ref tmp_Rect);
+
+            if (tmp_Rect.Left != d3_Rect.Left || tmp_Rect.Top != d3_Rect.Top)
+            {
+                hasChanged = true;
+                d3_Rect = tmp_Rect;
+            }
+            else
+            {
+                hasChanged = false;
+                return;
+            }
+
             // DPI SETTINGS
             Graphics g = Graphics.FromHwnd(IntPtr.Zero);
             IntPtr desktop = g.GetHdc();
@@ -216,15 +259,19 @@ namespace d3gamepad
             else
                 ScreenScalingFactor = (float)PhysicalScreenHeight / (float)LogicalScreenHeight;
 
+            int PrimaryScreenWidth = d3_Rect.Right - d3_Rect.Left;
+            int PrimaryScreenHeight = d3_Rect.Bottom - d3_Rect.Top;
+
             // SCREEN SETTINGS
+            d3Width = Convert.ToInt16(PrimaryScreenWidth * ScreenScalingFactor);
+            d3Height = Convert.ToInt16(PrimaryScreenHeight * ScreenScalingFactor);
+
             screenWidth = Convert.ToInt16(SystemParameters.PrimaryScreenWidth * ScreenScalingFactor);
             screenHeight = Convert.ToInt16(SystemParameters.PrimaryScreenHeight * ScreenScalingFactor);
 
-            screenWidth_round = screenHeight; // CIRCLE SCREEN
-            c_screenWidth = screenWidth / 2;
-            c_screenHeight = (screenHeight -
-                              screenHeight / character_ratio) / 2;
-            stick_speed2 = c_screenWidth / stick2_ratio;
+            c_d3Width = d3Width / 2;
+            c_d3Height = (d3Height - d3Height / character_ratio) / 2;
+            stick_speed2 = c_d3Width / stick2_ratio;
         }
     }
 }
