@@ -5,6 +5,7 @@ using System.Windows;
 using SharpDX.XInput;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.IO;
 
 namespace d3gamepad
 {
@@ -67,6 +68,8 @@ namespace d3gamepad
         // SCREEN VARIABLES
         public int d3Width { get; set; }
         public int d3Height { get; set; }
+        public int UIWidth { get; set; }
+        public int UIHeight { get; set; }
         public int c_d3Width { get; set; }
         public int c_d3Height { get; set; }
 
@@ -75,6 +78,7 @@ namespace d3gamepad
 
         public Rect d3_Rect = new Rect();
         public bool hasChanged = false;
+        private string D3Prefs;
 
         public double refresh_rate { get; set; }
         public int stick_speed2 { get; set;  }
@@ -143,7 +147,7 @@ namespace d3gamepad
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["deadzone"]))
                 deadzone = Convert.ToInt16(ConfigurationManager.AppSettings["deadzone"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["stick_speed"]))
-                stick_speed = Convert.ToInt16(ConfigurationManager.AppSettings["stick_speed"]);
+                stick_speed = Convert.ToInt32(ConfigurationManager.AppSettings["stick_speed"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["moveattack"]))
                 moveattack = Convert.ToBoolean(ConfigurationManager.AppSettings["moveattack"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["vibration"]))
@@ -223,55 +227,98 @@ namespace d3gamepad
             }
         }
 
-        public void UpdateScreenValues()
+        private string Between(ref string src, string start, string ended, bool del)
+        {
+            string ret = "";
+            int idxStart = src.IndexOf(start);
+            if (idxStart != -1)
+            {
+                idxStart = idxStart + start.Length;
+                int idxEnd = src.IndexOf(ended, idxStart);
+                if (idxEnd != -1)
+                {
+                    ret = src.Substring(idxStart, idxEnd - idxStart);
+                    if (del == true)
+                        src = src.Replace(start + ret + ended, "");
+                }
+            }
+            return ret;
+        }
+
+        public int DisplayModeWindowMode;
+        string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Documents", "Diablo III", "D3Prefs.txt");
+        public bool UpdateScreenValues()
         {
             // GET WINDOW
-            Process[] processes = Process.GetProcessesByName("Diablo III64");
+            hasChanged = false;
 
-            if (processes.Length == 0)
-                return;
-
-            Process d3 = processes[0];
-            IntPtr ptr = d3.MainWindowHandle;
-
-            Rect tmp_Rect = new Rect();
-            GetWindowRect(ptr, ref tmp_Rect);
-
-            if (tmp_Rect.Left != d3_Rect.Left || tmp_Rect.Top != d3_Rect.Top)
+            if (File.Exists(path))
             {
-                hasChanged = true;
-                d3_Rect = tmp_Rect;
+                try
+                {
+                    using (FileStream stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        using (StreamReader reader = new StreamReader(stream))
+                        {
+                            string readText = reader.ReadToEnd();
+                            if (readText != D3Prefs)
+                            {
+                                DisplayModeWindowMode = Int32.Parse(Between(ref readText, "DisplayModeWindowMode \"", "\"", false));
+                                Graphics g = Graphics.FromHwnd(IntPtr.Zero);
+                                IntPtr desktop = g.GetHdc();
+                                int LogicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.VERTRES);
+                                int PhysicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.DESKTOPVERTRES);
+                                ScreenScalingFactor = dpi_check ? (float)PhysicalScreenHeight / (float)LogicalScreenHeight : 1;
+
+                                screenWidth = Convert.ToInt16(SystemParameters.PrimaryScreenWidth * ScreenScalingFactor);
+                                screenHeight = Convert.ToInt16(SystemParameters.PrimaryScreenHeight * ScreenScalingFactor);
+
+                                if (DisplayModeWindowMode == 1)
+                                {
+                                    // Windowed
+                                    d3Width = Int32.Parse(Between(ref readText, "DisplayModeWinWidth \"", "\"", false));
+                                    d3Height = Int32.Parse(Between(ref readText, "DisplayModeWinHeight \"", "\"", false));
+
+                                    UIWidth = Int32.Parse(Between(ref readText, "DisplayModeWidth \"", "\"", false));
+                                    UIHeight = Int32.Parse(Between(ref readText, "DisplayModeHeight \"", "\"", false));
+
+                                    d3_Rect.Left = Int32.Parse(Between(ref readText, "DisplayModeWinLeft \"", "\"", false));
+                                    d3_Rect.Top = Int32.Parse(Between(ref readText, "DisplayModeWinTop \"", "\"", false));
+                                    d3_Rect.Right = d3_Rect.Left + d3Width;
+                                    d3_Rect.Bottom = d3_Rect.Top + d3Height;
+
+                                    // Windows bar
+                                    d3_Rect.Top += 30;
+                                }
+                                else
+                                {
+                                    // Fullscreen
+                                    UIWidth = d3Width = screenWidth;
+                                    UIHeight = d3Height = screenHeight;
+
+                                    d3_Rect.Left = 0;
+                                    d3_Rect.Top = 0;
+                                    d3_Rect.Right = UIWidth;
+                                    d3_Rect.Bottom = UIHeight;
+                                }
+
+                                Trace.WriteLine("DisplayModeWindowMode:" + DisplayModeWindowMode + "\nPrimaryScreenWidth:" + UIWidth + "\nPrimaryScreenHeight:" + UIHeight);
+                                c_d3Width = d3Width / 2;
+                                c_d3Height = (d3Height - d3Height / character_ratio) / 2;
+                                stick_speed2 = c_d3Width / stick2_ratio;
+
+                                D3Prefs = readText;
+                                hasChanged = true;
+                            }
+                        }
+                    }
+                }catch(Exception ex)
+                {
+                    // File is being read/write by D3
+                    Trace.WriteLine("File is being read/write by D3");
+                }
             }
-            else
-            {
-                hasChanged = false;
-                return;
-            }
-
-            // DPI SETTINGS
-            Graphics g = Graphics.FromHwnd(IntPtr.Zero);
-            IntPtr desktop = g.GetHdc();
-            int LogicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.VERTRES);
-            int PhysicalScreenHeight = GetDeviceCaps(desktop, (int)DeviceCap.DESKTOPVERTRES);
-
-            if (!dpi_check)
-                ScreenScalingFactor = 1;
-            else
-                ScreenScalingFactor = (float)PhysicalScreenHeight / (float)LogicalScreenHeight;
-
-            int PrimaryScreenWidth = d3_Rect.Right - d3_Rect.Left;
-            int PrimaryScreenHeight = d3_Rect.Bottom - d3_Rect.Top;
-
-            // SCREEN SETTINGS
-            d3Width = Convert.ToInt16(PrimaryScreenWidth * ScreenScalingFactor);
-            d3Height = Convert.ToInt16(PrimaryScreenHeight * ScreenScalingFactor);
-
-            screenWidth = Convert.ToInt16(SystemParameters.PrimaryScreenWidth * ScreenScalingFactor);
-            screenHeight = Convert.ToInt16(SystemParameters.PrimaryScreenHeight * ScreenScalingFactor);
-
-            c_d3Width = d3Width / 2;
-            c_d3Height = (d3Height - d3Height / character_ratio) / 2;
-            stick_speed2 = c_d3Width / stick2_ratio;
+            return hasChanged;
         }
     }
 }

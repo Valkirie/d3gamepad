@@ -24,29 +24,29 @@ namespace d3gamepad
         private bool stick2 = false;
 
         // BUTTONS & TRIGGERS
-        private bool trigger1 = false;
-        private bool skill1 = false;
-        private bool skill2 = false;
-        private bool skill3 = false;
-        private bool skill4 = false;
-        private bool skill5 = false;
-        private bool skill6 = false;
-        private bool potion = false;
-        private bool map = false;
-        private bool start = false;
-        private bool character = false;
-        private bool skill = false;
-        private bool town_portal = false;
-        private bool show_item = false;
-        private bool spacebar = false;
-        private bool ctrl = false;
+        public bool trigger1 = false;
+        public bool skill1 = false;
+        public bool skill2 = false;
+        public bool skill3 = false;
+        public bool skill4 = false;
+        public bool skill5 = false;
+        public bool skill6 = false;
+        public bool potion = false;
+        public bool map = false;
+        public bool start = false;
+        public bool character = false;
+        public bool skill = false;
+        public bool town_portal = false;
+        public bool show_item = false;
+        public bool spacebar = false;
+        public bool ctrl = false;
 
         // SETTINGS
         private bool moveattack = false;
         private bool vibration = false;
 
-        private int x_value;
-        private int y_value;
+        private float x_value;
+        private float y_value;
         private int cursor_x;
         private int cursor_y;
 
@@ -193,7 +193,7 @@ namespace d3gamepad
             state = _controller.GetState();
             gamepadState = state.Gamepad;
 
-            if (_settings.hasChanged)
+            if (_settings.UpdateScreenValues())
             {
                 cursor_x = _settings.d3_Rect.Left + _settings.c_d3Width; // Reset cursor for stick 2
                 cursor_y = _settings.d3_Rect.Top + _settings.c_d3Height; // Reset cursor for stick 2
@@ -216,7 +216,7 @@ namespace d3gamepad
                         if (!moveattack)
                             ForceMove(false);
                         ForceStop(true);
-                        force_ratio_inc = 3;
+                        force_ratio_inc = 2;
                         trigger1 = true;
                         SendVibration(vb_stick);
                     }
@@ -551,13 +551,13 @@ namespace d3gamepad
                     cursor_x = _settings.d3_Rect.Left + _settings.c_d3Width; // Reset cursor for stick 2
                     cursor_y = _settings.d3_Rect.Top + _settings.c_d3Height; // Reset cursor for stick 2
 
-                    var gamepad_x = Convert.ToInt16(leftStick.X * _settings.stick_speed);
-                    var gamepad_y = Convert.ToInt16(leftStick.Y * _settings.stick_speed);
-                    var x_ratio = gamepad_x * _settings.d3Height / _settings.max;
-                    var y_ratio = gamepad_y * _settings.d3Height / _settings.max;
+                    float gamepad_x = Convert.ToInt32(leftStick.X * (float)_settings.stick_speed);
+                    float gamepad_y = Convert.ToInt32(leftStick.Y * (float)_settings.stick_speed);
+                    float x_ratio = gamepad_x * (float)_settings.d3Height / (float)_settings.max;
+                    float y_ratio = gamepad_y * (float)_settings.d3Height / (float)_settings.max;
 
-                    var returned_x = x_ratio / (_settings.force_ratio - force_ratio_inc);
-                    var returned_y = -y_ratio / (_settings.force_ratio - force_ratio_inc);
+                    float returned_x = x_ratio / ((float)_settings.force_ratio - (float)force_ratio_inc);
+                    float returned_y = -y_ratio / ((float)_settings.force_ratio - (float)force_ratio_inc);
 
                     x_value = _settings.c_d3Width + _settings.d3_Rect.Left + returned_x;
                     y_value = _settings.c_d3Height + _settings.d3_Rect.Top + returned_y;
@@ -567,14 +567,14 @@ namespace d3gamepad
                         ForceMove(true);
                         if (!touch)
                         {
-                            contacts[0] = MakePointerTouchInfo(PointerInputType.TOUCH, PointerFlags.NONE, x_value,
-                                y_value, 1, 1, "Start");
+                            contacts[0] = MakePointerTouchInfo(PointerInputType.TOUCH, PointerFlags.NONE, (int)x_value,
+                                (int)y_value, 1, 1, "Start");
                             touch = true;
                         }
                         else
                         {
-                            contacts[0] = MakePointerTouchInfo(PointerInputType.TOUCH, PointerFlags.NONE, x_value,
-                                y_value, 1, 1, "Hover");
+                            contacts[0] = MakePointerTouchInfo(PointerInputType.TOUCH, PointerFlags.NONE, (int)x_value,
+                                (int)y_value, 1, 1, "Hover");
                         }
 
                         TouchInjector.InjectTouchInput(1, contacts);
@@ -583,8 +583,8 @@ namespace d3gamepad
                     {
                         if (touch)
                         {
-                            contacts[0] = MakePointerTouchInfo(PointerInputType.TOUCH, PointerFlags.NONE, x_value,
-                                y_value, 1, 1, "End");
+                            contacts[0] = MakePointerTouchInfo(PointerInputType.TOUCH, PointerFlags.NONE, (int)x_value,
+                                (int)y_value, 1, 1, "End");
                             TouchInjector.InjectTouchInput(1, contacts);
                             touch = false;
                         }
@@ -597,8 +597,8 @@ namespace d3gamepad
                     {
                         if (touch)
                         {
-                            contacts[0] = MakePointerTouchInfo(PointerInputType.TOUCH, PointerFlags.NONE, x_value,
-                                y_value, 1, 1, "End");
+                            contacts[0] = MakePointerTouchInfo(PointerInputType.TOUCH, PointerFlags.NONE, (int)x_value,
+                                (int)y_value, 1, 1, "End");
                             TouchInjector.InjectTouchInput(1, contacts);
                             touch = false;
                         }
