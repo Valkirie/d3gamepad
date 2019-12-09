@@ -18,6 +18,7 @@ using System.Diagnostics;
 using System.Windows.Media.Animation;
 using System.Threading;
 using System.Text;
+using System.Windows.Input;
 
 namespace d3gamepad
 {
@@ -60,7 +61,7 @@ namespace d3gamepad
         double default_padding = 11;
         double default_cell = 56;
         double default_bottom = 22;
-        double default_checkui = 58;
+        double default_checkui = 44;
 
         double default_check_inventory_w = 17;
         double default_check_inventory_h = 26;
@@ -116,6 +117,39 @@ namespace d3gamepad
             return null;
         }
 
+        private bool IsInGame()
+        {
+            return GetActiveWindowTitle() == "Diablo III";
+        }
+
+        private bool IsInMap()
+        {
+            double cursor_x = _settings.d3_Rect.Left + draw_pos_x;
+            double cursor_y = _settings.d3_Rect.Bottom - current_checkui;
+
+            System.Drawing.Point cursor = new System.Drawing.Point((int)cursor_x, (int)cursor_y);
+            System.Drawing.Color c = GetColorAt(cursor);
+
+            if (c.R > c.B && c.R > c.G && c.R >= 90)
+                return true;
+
+            return false;
+        }
+
+        private bool IsInInventory()
+        {
+            double cursor_x = _settings.d3_Rect.Right - 2 - current_check_inventory_w;
+            double cursor_y = _settings.d3_Rect.Top + current_check_inventory_h;
+
+            System.Drawing.Point cursor = new System.Drawing.Point((int)cursor_x, (int)cursor_y);
+            System.Drawing.Color c = GetColorAt(cursor);
+
+            if (c.R > c.G && c.G > c.B && c.R >= 60 && c.B <= 20)
+                return true;
+
+            return false;
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -132,7 +166,8 @@ namespace d3gamepad
             {
                 var timer = Observable.Interval(TimeSpan.FromMilliseconds(_settings.refresh_rate));
 
-                timer.Subscribe(_ => {
+                timer.Subscribe(_ =>
+                {
                     if (_gameController.IsConnected())
                     {
                         _gameController.Poll();
@@ -143,13 +178,15 @@ namespace d3gamepad
 
                             Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                             {
+                                // Clear UI
                                 myCanvas.Children.Clear();
+
+                                // Reset UI size
                                 Form1.Height = _settings.d3Height;
                                 Form1.Width = _settings.d3Width;
                                 Form1.Top = _settings.d3_Rect.Top;
                                 Form1.Left = _settings.d3_Rect.Left;
 
-                                string ico = "";
                                 draw_pos_x = _settings.c_d3Width - (current_padding / 2);
                                 draw_pos_y = _settings.d3Height - current_cell - (default_bottom * compute_h_ratio);
 
@@ -162,6 +199,7 @@ namespace d3gamepad
                                 if (_settings.DisplayModeWindowMode == 1)
                                     draw_pos_y -= 8;
 
+                                string ico;
                                 for (int i = -9; i <= 3; i += 2)
                                 {
                                     switch (i)
@@ -173,16 +211,16 @@ namespace d3gamepad
                                         case -1: ico = "X"; break;
                                         case 1: ico = "A"; break;
                                         case 3: ico = "LB"; break;
+                                        default: ico = "B"; break;
                                     }
 
                                     Rectangle rect = new Rectangle
                                     {
-                                        Name = ico,
+                                        Name = "button_" + ico,
                                         Fill = new ImageBrush
                                         {
                                             ImageSource = new System.Windows.Media.Imaging.BitmapImage(new Uri(".\\Ressources\\XBOne_" + ico + ".png", UriKind.Relative))
                                         },
-                                        //Fill = new SolidColorBrush(System.Windows.Media.Colors.White),
                                         Width = (int)current_cell / 2,
                                         Height = (int)current_cell / 2,
                                         Stretch = Stretch.Uniform,
@@ -192,37 +230,31 @@ namespace d3gamepad
                                     Canvas.SetLeft(rect, draw_pos_x);
                                     myCanvas.Children.Add(rect);
 
-                                    draw_pos_x += current_cell;
-                                    draw_pos_x += current_padding;
+                                    if (i <= 1)
+                                    {
+                                        draw_pos_x += current_cell;
+                                        draw_pos_x += current_padding;
+                                    }
                                 }
 
-                                draw_pos_x += current_padding + current_padding / 2;
+                                draw_pos_x += current_cell / 2;
                             }));
                         }
 
-                        // IsInMap()
-                        double cursor_x = _settings.d3_Rect.Left + draw_pos_x;
-                        double cursor_y = _settings.d3_Rect.Bottom - current_checkui;
-                        System.Drawing.Point cursor = new System.Drawing.Point((int)cursor_x, (int)cursor_y);
-                        System.Drawing.Color c = GetColorAt(cursor);
-
-                        if (c.B > c.R && c.B > c.G && c.B >= 90 && GetActiveWindowTitle() == "Diablo III")
-                            Application.Current.Dispatcher.BeginInvoke((Action)(() => { myCanvas.Visibility = Visibility.Visible; }));
+                        if (IsInGame() && IsInMap())
+                        {
+                            Application.Current.Dispatcher.BeginInvoke((Action)(() =>
+                            {
+                                myCanvas.Visibility = Visibility.Visible;
+                            }));
+                        }
                         else
-                            Application.Current.Dispatcher.BeginInvoke((Action)(() => { myCanvas.Visibility = Visibility.Hidden; }));
-
-                        // IsInIventory()
-                        cursor_x = _settings.d3_Rect.Right - 2 - current_check_inventory_w;
-                        cursor_y = _settings.d3_Rect.Top + current_check_inventory_h;
-
-                        cursor = new System.Drawing.Point((int)cursor_x, (int)cursor_y);
-                        c = GetColorAt(cursor);
-                        //SetCursorPos((int)cursor_x, (int)cursor_y);
-
-                        if (c.R > c.G && c.G > c.B && c.R >= 60 && c.B <= 20)
-                            Trace.WriteLine("IsInInventory()");
-
-                        // Trace.WriteLine(c.R + "," + c.G + "," + c.B + "\nx:" + (int)cursor_x + ",y:" + (int)cursor_y);
+                        {
+                            Application.Current.Dispatcher.BeginInvoke((Action)(() =>
+                            {
+                                myCanvas.Visibility = Visibility.Hidden;
+                            }));
+                        }
                     }
                 });
             }

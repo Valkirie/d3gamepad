@@ -35,7 +35,7 @@ namespace d3gamepad
 
         public int character_ratio { get; }
         public int deadzone { get; }
-        public int force_ratio { get; }
+        public double force_ratio { get; }
         public int max { get; }
         public int max_stick { get; }
         public int stick_speed { get; }
@@ -135,7 +135,7 @@ namespace d3gamepad
                 VKC_SKIP = Convert.ToString(ConfigurationManager.AppSettings["VKC_SKIP"]);
 
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["force_ratio"]))
-                force_ratio = Convert.ToInt16(ConfigurationManager.AppSettings["force_ratio"]);
+                force_ratio = Convert.ToDouble(ConfigurationManager.AppSettings["force_ratio"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["stick2_ratio"]))
                 stick2_ratio = Convert.ToInt16(ConfigurationManager.AppSettings["stick2_ratio"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["character_ratio"]))
@@ -289,6 +289,7 @@ namespace d3gamepad
 
                                     // Windows bar
                                     d3_Rect.Top += 30;
+                                    d3Height -= 30;
                                 }
                                 else
                                 {

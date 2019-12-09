@@ -668,16 +668,21 @@ namespace d3gamepad
 
         private static Vector Normalize(short rawX, short rawY, short threshold)
         {
-            var value = new Vector(rawX, rawY);
-            var magnitude = value.Length;
-            var vector = (magnitude > 0 ? magnitude : 1);
+            Vector value = new Vector(rawX, rawY);
+            double magnitude = value.Length;
+            double vector = (magnitude > 0 ? magnitude : 1);
             var direction = value / vector;
 
             var normalizedMagnitude = 0.0;
             if (magnitude - threshold > 0)
+            {
                 normalizedMagnitude = Math.Min((magnitude - threshold) / (short.MaxValue - threshold), 1);
+                normalizedMagnitude = normalizedMagnitude < 0.2 ? 0.2 : normalizedMagnitude;
 
-            return direction * normalizedMagnitude;
+                return direction * normalizedMagnitude;
+            }
+
+            return new Vector(0,0);
         }
 
         private void SendVibration(Vibration vb)
