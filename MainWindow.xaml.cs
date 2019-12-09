@@ -242,19 +242,9 @@ namespace d3gamepad
                         }
 
                         if (IsInGame() && IsInMap())
-                        {
-                            Application.Current.Dispatcher.BeginInvoke((Action)(() =>
-                            {
-                                myCanvas.Visibility = Visibility.Visible;
-                            }));
-                        }
+                            Application.Current.Dispatcher.BeginInvoke((Action)(() => { myCanvas.Visibility = Visibility.Visible; }));
                         else
-                        {
-                            Application.Current.Dispatcher.BeginInvoke((Action)(() =>
-                            {
-                                myCanvas.Visibility = Visibility.Hidden;
-                            }));
-                        }
+                            Application.Current.Dispatcher.BeginInvoke((Action)(() => { myCanvas.Visibility = Visibility.Hidden; }));
                     }
                 });
             }
