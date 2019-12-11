@@ -1,6 +1,6 @@
 ﻿<Window x:Name="Form1" x:Class="d3gamepad.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="d3gamepad" Height="720" Width="1280" Topmost="True" AllowsTransparency="True" WindowStyle="None" Background="{x:Null}" Left="0" Top="0">
-    <Canvas x:Name="myCanvas" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Hidden"/>
+        Title="d3gamepad" Height="720" Width="1280" Topmost="True" AllowsTransparency="True" WindowStyle="None" Background="{x:Null}" Left="0" Top="0" Visibility="Visible">
+    <Canvas x:Name="Canvas1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="Hidden"/>
 </Window>

@@ -1,9 +1,12 @@
+using SharpDX.XInput;
 using System;
+using System.Reactive.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
+using TCD.System.TouchInjection;
 using WindowsInput;
 using WindowsInput.Native;
-using SharpDX.XInput;
-using TCD.System.TouchInjection;
 
 namespace d3gamepad
 {
@@ -42,9 +45,6 @@ namespace d3gamepad
         public bool ctrl = false;
 
         // SETTINGS
-        private bool moveattack = false;
-        private bool vibration = false;
-
         private float x_value;
         private float y_value;
         private int cursor_x;
@@ -52,10 +52,6 @@ namespace d3gamepad
 
         private PointerTouchInfo[] contacts = new PointerTouchInfo[1];
         private bool touch = false;
-        private Vibration vb_null;
-        private Vibration vb_stick;
-        private Vibration vb_button;
-        private Vibration vb_heavy;
 
         // STATES VARIABLES
         private State state;
@@ -126,10 +122,6 @@ namespace d3gamepad
             _settings = settings;
             _inputSimulator = simulator;
 
-            // VIBRATION SETTINGS
-            vb_stick.RightMotorSpeed = 0;
-            vb_stick.LeftMotorSpeed = Convert.ToUInt16(_settings.vb_stick_value);
-
             // DEFINE VKCs
             VKC_ForceMove = StringToVKC(_settings.VKC_ForceMove);
             VKC_ForceStop = StringToVKC(_settings.VKC_ForceStop);
@@ -187,13 +179,25 @@ namespace d3gamepad
             return contact;
         }
 
+        public enum rumble
+        {
+            none = 0,
+            weakest = 1000,
+            weaker = 3000,
+            weak = 6000,
+            medium = 12000,
+            strong = 24000,
+            extreme = 48000
+        }
 
+        private bool rumble_left, rumble_right;
+        private int rumble_left_str, rumble_right_str;
         public void Poll()
         {
             state = _controller.GetState();
             gamepadState = state.Gamepad;
 
-            if (_settings.UpdateScreenValues())
+            if (_settings.hasChanged)
             {
                 cursor_x = _settings.d3_Rect.Left + _settings.c_d3Width; // Reset cursor for stick 2
                 cursor_y = _settings.d3_Rect.Top + _settings.c_d3Height; // Reset cursor for stick 2
@@ -213,12 +217,12 @@ namespace d3gamepad
                 {
                     if (!trigger1)
                     {
-                        if (!moveattack)
+                        if (!_settings.moveattack)
                             ForceMove(false);
                         ForceStop(true);
                         force_ratio_inc = 2;
                         trigger1 = true;
-                        SendVibration(vb_stick);
+                        Task.Factory.StartNew(() => SendVibration((int)rumble.weakest, 0, -1));
                     }
                 }
                 else
@@ -228,7 +232,7 @@ namespace d3gamepad
                         ForceStop(false);
                         force_ratio_inc = 0;
                         trigger1 = false;
-                        SendVibration(vb_null);
+                        Task.Factory.StartNew(() => SendVibration(-1, 0, -1));
                     }
                 }
 
@@ -241,6 +245,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Mouse.LeftButtonDown();
                         skill1 = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -261,6 +266,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Mouse.RightButtonDown();
                         skill2 = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -281,6 +287,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_Skill3);
                         skill3 = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -301,6 +308,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_Skill4);
                         skill4 = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -321,6 +329,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_Skill5);
                         skill5 = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -341,6 +350,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_Skill6);
                         skill6 = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -361,6 +371,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_Potion);
                         potion = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -381,6 +392,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_Start);
                         start = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -401,6 +413,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_Character);
                         character = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -425,6 +438,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_Inventory);
                         show_item = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -445,6 +459,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_TownPortal);
                         town_portal = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -465,6 +480,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_Skill);
                         skill = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -485,6 +501,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_MAP);
                         map = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -505,6 +522,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_SKIP);
                         spacebar = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -525,6 +543,7 @@ namespace d3gamepad
                     {
                         _inputSimulator.Keyboard.KeyDown(VKC_HINTS);
                         ctrl = true;
+                        Task.Factory.StartNew(() => SendVibration(0, (int)rumble.weaker));
                     }
                 }
                 else
@@ -685,10 +704,40 @@ namespace d3gamepad
             return new Vector(0,0);
         }
 
-        private void SendVibration(Vibration vb)
+        int known_left, known_right;
+        public void SendVibration(int left_force = 0, int right_force = 0, int delay = 0)
         {
-            if (vibration)
-                _controller.SetVibration(vb);
+            if (_settings.rumble)
+            {
+                Vibration motors = new Vibration();
+
+                switch(left_force)
+                {
+                    case -1:
+                        motors.LeftMotorSpeed = 0; known_left = 0;  break;
+                    case 0:
+                        motors.LeftMotorSpeed = (ushort)known_left; break;
+                    default:
+                        motors.LeftMotorSpeed = (ushort)left_force; known_left = left_force; break;
+                }
+                switch (right_force)
+                {
+                    case -1:
+                        motors.RightMotorSpeed = 0; known_right = 0; break;
+                    case 0:
+                        motors.RightMotorSpeed = (ushort)known_right; break;
+                    default:
+                        motors.RightMotorSpeed = (ushort)right_force; known_right = right_force; break;
+                }
+
+                _controller.SetVibration(motors);
+
+                if(delay != -1)
+                {
+                    Thread.Sleep(_settings.rumble_delay);
+                    SendVibration(left_force > 0 ? -1 : known_left, right_force > 0 ? -1 : known_right, -1);
+                }
+            }
         }
 
         public bool IsConnected()

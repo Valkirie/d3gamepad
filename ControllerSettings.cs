@@ -41,7 +41,8 @@ namespace d3gamepad
         public int stick_speed { get; }
         public int stick2_ratio { get; }
         public int vb_stick_value { get; }
-        public bool vibration { get; }
+        public bool rumble { get; }
+        public int rumble_delay { get; }
         public bool dpi_check { get; }
         public bool moveattack { get; set; }
         public float ScreenScalingFactor { get; set; }
@@ -80,7 +81,7 @@ namespace d3gamepad
         public bool hasChanged = false;
         private string D3Prefs;
 
-        public double refresh_rate { get; set; }
+        public int refresh_rate { get; set; }
         public int stick_speed2 { get; set;  }
 
         public GamepadButtonFlags GamepadButtonFlagsA { get; }
@@ -150,15 +151,17 @@ namespace d3gamepad
                 stick_speed = Convert.ToInt32(ConfigurationManager.AppSettings["stick_speed"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["moveattack"]))
                 moveattack = Convert.ToBoolean(ConfigurationManager.AppSettings["moveattack"]);
-            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["vibration"]))
-                vibration = Convert.ToBoolean(ConfigurationManager.AppSettings["vibration"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["rumble"]))
+                rumble = Convert.ToBoolean(ConfigurationManager.AppSettings["rumble"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["rumble_delay"]))
+                rumble_delay = Convert.ToInt16(ConfigurationManager.AppSettings["rumble_delay"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["vb_stick"]))
                 vb_stick_value = Convert.ToInt16(ConfigurationManager.AppSettings["vb_stick"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["dpi_check"]))
                 dpi_check = Convert.ToBoolean(ConfigurationManager.AppSettings["dpi_check"]);
 
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["refresh_rate"]))
-                refresh_rate = Convert.ToDouble(ConfigurationManager.AppSettings["refresh_rate"]);
+                refresh_rate = Convert.ToInt16(ConfigurationManager.AppSettings["refresh_rate"]);
 
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["GamepadButtonFlagsX"]))
                 GamepadButtonFlagsX = ReadKeyString(ConfigurationManager.AppSettings["GamepadButtonFlagsX"]);
@@ -313,7 +316,7 @@ namespace d3gamepad
                             }
                         }
                     }
-                }catch(Exception ex)
+                }catch(Exception)
                 {
                     // File is being read/write by D3
                     Trace.WriteLine("File is being read/write by D3");
