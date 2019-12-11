@@ -26,24 +26,21 @@ namespace d3gamepad
         private static GameController _gameController;
         private static InputSimulator _inputSimulator;
         private static ControllerSettings _settings;
-
-        [DllImport("user32.dll")]
-        static extern bool GetCursorPos(ref System.Drawing.Point lpPoint);
-
-        [DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true, ExactSpelling = true)]
-        public static extern int BitBlt(IntPtr hDC, int x, int y, int nWidth, int nHeight, IntPtr hSrcDC, int xSrc, int ySrc, int dwRop);
         
         [DllImport("User32.Dll")]
         public static extern long SetCursorPos(int x, int y);
 
+        [DllImport("user32.dll")]
+        static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+
         public static Bitmap CaptureFromScreen(System.Drawing.Point location, int width, int height)
         {
             Bitmap bmpScreenCapture = new Bitmap(width, height);
-
             Graphics p = Graphics.FromImage(bmpScreenCapture);
-
             p.CopyFromScreen(location.X,location.Y, 0, 0, new System.Drawing.Size(width, height), CopyPixelOperation.SourceCopy);
-
             p.Dispose();
 
             return bmpScreenCapture;
@@ -52,9 +49,7 @@ namespace d3gamepad
         public static System.Drawing.Color GetColorFromScreen(System.Drawing.Point location)
         {
             Bitmap map = CaptureFromScreen(location,1,1);
-
             System.Drawing.Color c = map.GetPixel(0, 0);
-
             map.Dispose();
 
             return c;
@@ -65,7 +60,7 @@ namespace d3gamepad
         static double default_padding = 11;
         static double default_cell = 56;
         static double default_bottom = 22;
-        static double default_checkui = 120;
+        static double default_checkui = 17;
         static double default_check_inventory_w = 17;
         static double default_check_inventory_h = 26;
 
@@ -84,8 +79,8 @@ namespace d3gamepad
 
         private static void ComputeScreenValues()
         {
-            current_h_ratio = (double)_settings.UIHeight;
-            current_w_ratio = (double)_settings.UIWidth;
+            current_h_ratio = _settings.UIHeight;
+            current_w_ratio = _settings.UIWidth;
 
             compute_h_ratio = current_h_ratio / default_h_ratio;
             compute_w_ratio = current_w_ratio / default_w_ratio;
@@ -103,12 +98,6 @@ namespace d3gamepad
             current_life_check_high = default_life_check_high * compute_h_ratio;
             current_life_check_left = default_life_check_left * compute_h_ratio;
         }
-
-        [DllImport("user32.dll")]
-        static extern IntPtr GetForegroundWindow();
-
-        [DllImport("user32.dll")]
-        static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
 
         private static string GetActiveWindowTitle()
         {
@@ -130,15 +119,14 @@ namespace d3gamepad
 
         private static bool IsInMap()
         {
-            double cursor_x = _settings.d3_Rect.Left + _settings.c_d3Width;
+            double cursor_x = _settings.d3_Rect.Left + _settings.c_d3Width - (34 * compute_h_ratio);
             double cursor_y = _settings.d3_Rect.Bottom - current_checkui;
 
             System.Drawing.Point cursor = new System.Drawing.Point((int)cursor_x, (int)cursor_y);
             System.Drawing.Color c = GetColorFromScreen(cursor);
 
-            if (c.R >= 130 && c.G >= 130 && c.B >= 130)
-                if(c.R <= 220 && c.G <= 220 && c.B <= 220)
-                    return true;
+            if (c.G > c.R && c.G > c.B && c.R <= 50 && c.G >= 100 && c.B <= 50)
+                return true;
 
             return false;
         }
@@ -180,7 +168,6 @@ namespace d3gamepad
                 G = c.G > 0 ? c.G : 1;
                 B = c.B > 0 ? c.B : 1;
 
-                Trace.WriteLine(R + "," + G + "," + B);
                 if (R / G > 2 && R / B > 2 && R > 50 && R < 140)
                     break;
                 else
@@ -240,57 +227,32 @@ namespace d3gamepad
                     ComputeScreenValues();
                     Application.Current.Dispatcher.BeginInvoke((Action)(() =>
                     {
-                        myCanvas.Children.Clear();
                         myForm.Height = _settings.d3Height;
                         myForm.Width = _settings.d3Width;
                         myForm.Top = _settings.d3_Rect.Top;
                         myForm.Left = _settings.d3_Rect.Left;
 
-                        draw_pos_x = _settings.c_d3Width - (current_padding / 2);
-                        draw_pos_y = _settings.d3Height - current_cell - (default_bottom * compute_h_ratio);
+                        myGamepad.Width = (int)current_cell;
+                        myGamepad.Height = (int)current_cell;
+                        Canvas.SetTop(myGamepad, 40 * compute_h_ratio); // temp
+                        Canvas.SetLeft(myGamepad, _settings.d3Width - (90 * compute_h_ratio)); // temp
 
-                        for (int i = 0; i < 5; i++)
-                            draw_pos_x -= current_cell;
+                        draw_pos_x = _settings.c_d3Width - (current_padding / 2) - current_cell;
+                        draw_pos_y = _settings.d3Height - current_cell - current_bottom;
 
                         for (int i = 0; i < 4; i++)
-                            draw_pos_x -= current_padding;
+                            draw_pos_x -= (current_cell + current_padding);
 
-                        if (_settings.DisplayModeWindowMode == 1)
-                            draw_pos_y -= 8;
-
-                        string ico;
-                        for (int i = -9; i <= 3; i += 2)
+                        foreach(UIElement item in myCanvas.Children)
                         {
-                            switch (i)
+                            if (item is System.Windows.Shapes.Rectangle)
                             {
-                                case -9: ico = "B"; break;
-                                case -7: ico = "Y"; break;
-                                case -5: ico = "RB"; break;
-                                case -3: ico = "RT"; break;
-                                case -1: ico = "X"; break;
-                                case 1: ico = "A"; break;
-                                case 3: ico = "LB"; break;
-                                default: ico = "B"; break;
-                            }
+                                ((System.Windows.Shapes.Rectangle)item).Width = (int)current_cell / 2;
+                                ((System.Windows.Shapes.Rectangle)item).Height = (int)current_cell / 2;
 
-                            System.Windows.Shapes.Rectangle rect = new System.Windows.Shapes.Rectangle
-                            {
-                                Name = "button_" + ico,
-                                Fill = new ImageBrush
-                                {
-                                    ImageSource = new System.Windows.Media.Imaging.BitmapImage(new Uri(".\\Ressources\\XBOne_" + ico + ".png", UriKind.Relative))
-                                },
-                                Width = (int)current_cell / 2,
-                                Height = (int)current_cell / 2,
-                                Stretch = Stretch.Uniform,
-                            };
+                                Canvas.SetTop(item, draw_pos_y);
+                                Canvas.SetLeft(item, draw_pos_x);
 
-                            Canvas.SetTop(rect, draw_pos_y);
-                            Canvas.SetLeft(rect, draw_pos_x);
-                            myCanvas.Children.Add(rect);
-
-                            if (i <= 1)
-                            {
                                 draw_pos_x += current_cell;
                                 draw_pos_x += current_padding;
                             }
@@ -300,13 +262,32 @@ namespace d3gamepad
                     }));
                 }
 
-                if (IsInGame() && IsInMap())
-                {
-                    if(myCanvas.Visibility == Visibility.Hidden)
-                        Application.Current.Dispatcher.BeginInvoke((Action)(() => { myCanvas.Visibility = Visibility.Visible; }));
-                }
-                else if (myCanvas.Visibility == Visibility.Visible)
-                    Application.Current.Dispatcher.BeginInvoke((Action)(() => { myCanvas.Visibility = Visibility.Hidden; }));
+                Application.Current.Dispatcher.BeginInvoke((Action)(() => {
+                    if (IsInGame())
+                    {
+                        myCanvas.Visibility = Visibility.Visible;
+
+                        if (_gameController.IsConnected())
+                            myGamepad.Visibility = Visibility.Visible;
+                        else
+                            myGamepad.Visibility = Visibility.Hidden;
+
+                        if (IsInMap())
+                        {
+                            foreach (UIElement item in myCanvas.Children)
+                                if (item is System.Windows.Shapes.Rectangle)
+                                    item.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            foreach (UIElement item in myCanvas.Children)
+                                if (item is System.Windows.Shapes.Rectangle)
+                                    item.Visibility = Visibility.Hidden;
+                        }
+                    }
+                    else
+                        myCanvas.Visibility = Visibility.Hidden;
+                }));
 
                 Thread.Sleep(100);
             }
@@ -314,6 +295,7 @@ namespace d3gamepad
 
         static d3gamepad.MainWindow myForm;
         static Canvas myCanvas;
+        static System.Windows.Controls.Image myGamepad;
         public MainWindow()
         {
             InitializeComponent();
@@ -329,6 +311,33 @@ namespace d3gamepad
             // STATICS
             myForm = Form1;
             myCanvas = Canvas1;
+            myGamepad = GamepadIco;
+
+            string ico = "Menu";
+            for (int i = 0; i < 7; i ++)
+            {
+                switch (i)
+                {
+                    case 0: ico = "B"; break;
+                    case 1: ico = "Y"; break;
+                    case 2: ico = "RB"; break;
+                    case 3: ico = "RT"; break;
+                    case 4: ico = "X"; break;
+                    case 5: ico = "A"; break;
+                    case 6: ico = "LB"; break;
+                }
+
+                System.Windows.Shapes.Rectangle rect = new System.Windows.Shapes.Rectangle
+                {
+                    Fill = new ImageBrush
+                    {
+                        ImageSource = new System.Windows.Media.Imaging.BitmapImage(new Uri(".\\Ressources\\XBOne_" + ico + ".png", UriKind.Relative))
+                    },
+                    Stretch = Stretch.Uniform,
+                };
+
+                myCanvas.Children.Add(rect);
+            }
 
             Thread myThread = new Thread(new ThreadStart(ThreadHealth));
             myThread.Start();
@@ -339,9 +348,6 @@ namespace d3gamepad
             Thread myThread3 = new Thread(new ThreadStart(ThreadUI));
             myThread3.Start();
         }
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern uint SendInput(uint nInputs, ref INPUT pInputs, int cbSize);
 
         [StructLayout(LayoutKind.Sequential)]
         private struct INPUT

@@ -288,11 +288,11 @@ namespace d3gamepad
                                     d3_Rect.Left = Int32.Parse(Between(ref readText, "DisplayModeWinLeft \"", "\"", false));
                                     d3_Rect.Top = Int32.Parse(Between(ref readText, "DisplayModeWinTop \"", "\"", false));
                                     d3_Rect.Right = d3_Rect.Left + d3Width;
-                                    d3_Rect.Bottom = d3_Rect.Top + d3Height;
 
                                     // Windows bar
                                     d3_Rect.Top += 30;
-                                    d3Height -= 30;
+                                    d3Height -= 38; // why 8 ?!
+                                    d3_Rect.Bottom = d3_Rect.Top + d3Height;
                                 }
                                 else
                                 {
