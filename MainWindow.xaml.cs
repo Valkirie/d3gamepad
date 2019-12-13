@@ -194,7 +194,7 @@ namespace d3gamepad
                         int damage = health_known - health_current;
                         int vibra = Math.Min(Math.Abs(damage) * 5000, 60000);
 
-                        if (damage >= 3 && health_current != 0) // min percentage damage for rumble
+                        if (damage >= _settings.rumble_min_dmg && health_current != 0)
                             _gameController.SendVibration(vibra, vibra);
 
                         health_known = health_current;

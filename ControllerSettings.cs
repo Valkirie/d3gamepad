@@ -43,6 +43,7 @@ namespace d3gamepad
         public int vb_stick_value { get; }
         public bool rumble { get; }
         public int rumble_delay { get; }
+        public int rumble_min_dmg { get; }
         public bool dpi_check { get; }
         public bool moveattack { get; set; }
         public float ScreenScalingFactor { get; set; }
@@ -155,6 +156,8 @@ namespace d3gamepad
                 rumble = Convert.ToBoolean(ConfigurationManager.AppSettings["rumble"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["rumble_delay"]))
                 rumble_delay = Convert.ToInt16(ConfigurationManager.AppSettings["rumble_delay"]);
+            if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["rumble_min_dmg"]))
+                rumble_min_dmg = Convert.ToInt16(ConfigurationManager.AppSettings["rumble_min_dmg"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["vb_stick"]))
                 vb_stick_value = Convert.ToInt16(ConfigurationManager.AppSettings["vb_stick"]);
             if (!string.IsNullOrEmpty(ConfigurationManager.AppSettings["dpi_check"]))
