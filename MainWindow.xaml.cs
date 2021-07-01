@@ -18,6 +18,8 @@ using System.Threading;
 using System.Text;
 using System.Windows.Input;
 using System.Drawing;
+using System.Windows.Media.Imaging;
+using System.Windows.Interop;
 
 namespace d3gamepad
 {
@@ -35,6 +37,10 @@ namespace d3gamepad
 
         [DllImport("user32.dll")]
         static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+
+        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool DeleteObject([In] IntPtr hObject);
 
         public static Bitmap CaptureFromScreen(System.Drawing.Point location, int width, int height)
         {
@@ -293,6 +299,24 @@ namespace d3gamepad
             }
         }
 
+        public static Bitmap GetImageByName(string imageName)
+        {
+            System.Reflection.Assembly asm = System.Reflection.Assembly.GetExecutingAssembly();
+            string resourceName = asm.GetName().Name + ".Properties.Resources";
+            var rm = new System.Resources.ResourceManager(resourceName, asm);
+            return (Bitmap)rm.GetObject(imageName);
+        }
+
+        public ImageSource ImageSourceFromBitmap(Bitmap bmp)
+        {
+            var handle = bmp.GetHbitmap();
+            try
+            {
+                return Imaging.CreateBitmapSourceFromHBitmap(handle, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            }
+            finally { DeleteObject(handle); }
+        }
+
         static d3gamepad.MainWindow myForm;
         static Canvas myCanvas;
         static System.Windows.Controls.Image myGamepad;
@@ -331,7 +355,7 @@ namespace d3gamepad
                 {
                     Fill = new ImageBrush
                     {
-                        ImageSource = new System.Windows.Media.Imaging.BitmapImage(new Uri(".\\Ressources\\XBOne_" + ico + ".png", UriKind.Relative))
+                        ImageSource = ImageSourceFromBitmap(GetImageByName("XBOne_" + ico))
                     },
                     Stretch = Stretch.Uniform,
                 };

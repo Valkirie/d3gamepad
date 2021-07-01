@@ -168,75 +168,68 @@
     <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Ressources\XBOne_A.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_B.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_DPad.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_DPad_All.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_DPad_Down.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_DPad_Left.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_DPad_Right.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_DPad_Up.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_DPad_XAxis.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_DPad_YAxis.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_LB.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_LT.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_Menu.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_RB.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_RT.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_View.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_X.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Ressources\XBOne_Y.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Ressources\ImageSearchDLL.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Resource Include="Ressources\XBOne_Gamepad.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_A.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_B.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_DPad.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_DPad_All.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_DPad_Down.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_DPad_Left.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_DPad_Right.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_DPad_Up.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_DPad_XAxis.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_DPad_YAxis.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_LB.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_LT.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_Menu.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_RB.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_RT.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_View.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_X.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\XBOne_Y.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="img\XBOne_Gamepad.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
