@@ -28,7 +28,8 @@ namespace d3gamepad
         private static GameController _gameController;
         private static InputSimulator _inputSimulator;
         private static ControllerSettings _settings;
-        
+        private static bool IsAlive;
+
         [DllImport("User32.Dll")]
         public static extern long SetCursorPos(int x, int y);
 
@@ -190,7 +191,7 @@ namespace d3gamepad
         public static void ThreadHealth()
         {
             int health_known = 100;
-            while (Thread.CurrentThread.IsAlive)
+            while (IsAlive)
             {
                 if (_gameController.IsConnected())
                 {
@@ -213,7 +214,7 @@ namespace d3gamepad
 
         public static void ThreadGamepad()
         {
-            while (Thread.CurrentThread.IsAlive)
+            while (IsAlive)
             {
                 if (_gameController.IsConnected())
                     _gameController.Poll();
@@ -224,8 +225,12 @@ namespace d3gamepad
 
         public static void ThreadUI()
         {
-            while (Thread.CurrentThread.IsAlive)
+            while (IsAlive)
             {
+                // avoid crash on closing
+                if (Application.Current == null)
+                    return;
+
                 _settings.UpdateScreenValues();
 
                 if (_settings.hasChanged)
@@ -323,6 +328,7 @@ namespace d3gamepad
         public MainWindow()
         {
             InitializeComponent();
+            IsAlive = true;
 
             // TOUCH SETTINGS
             TouchInjector.InitializeTouchInjection();
@@ -371,6 +377,13 @@ namespace d3gamepad
 
             Thread myThread3 = new Thread(new ThreadStart(ThreadUI));
             myThread3.Start();
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            IsAlive = false;
+            Application.Current.Shutdown();
         }
 
         [StructLayout(LayoutKind.Sequential)]
